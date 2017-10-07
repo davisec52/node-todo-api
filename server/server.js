@@ -17,10 +17,13 @@ app.post("/todos", (req, res) => {
 	newItem.save().then((doc) => {
 		res.send(doc);
 	}, err => {
-		console.log("Unable to save todo ", err);
+		res.status(400).send(err);
+		return;
 	});
 });
 
 app.listen(3000, () => {
 	console.log("Server listening on 3000...");
 });
+
+module.exports = {app};
