@@ -100,3 +100,42 @@ describe("Get /todos/:id", () => {
 	}, err => {res.status(404).send(err)});
 
 });
+
+describe("DELETE /todos/:id", () => {
+	it("should delete a single todo item by Id", (done) => {
+		testRequest(app)
+			.delete(`/todos/${todos[0]._id.toHexString()}`)
+			.expect(202)
+			.expect((res) => {
+				expect(res.body.todo._id).toBe(`${todos[0]._id.toHexString()}`)
+			})
+			.end((err, res) => {
+				if(err) {
+					return done(err);
+				}
+
+				Todo.findById(`${todos[0]._id.toHexString()}`).then((todo)=> {
+					expect(todo).toNotExist();
+					done();
+				}).catch((e) => done(e));
+
+			});
+
+			
+	});
+
+	it("should return a 404 with if not found", (done) => {
+		testRequest(app)
+			.delete(`/todos/${ObjectID().toHexString()}`)
+			.expect(404)
+			.end(done);
+	}, err => {res.status(404).send(err)});
+
+	it("should return a 404 for non standard object Ids", (done) => {
+		testRequest(app)
+			.delete(`/todos/${todos[0]._id.toHexString()}xyz`)
+			.expect(404)
+			.end((err, res) => {if(err) {console.log(err);} done()});
+	}, err => {res.status(404).send(err)});
+
+});
