@@ -74,11 +74,12 @@ app.listen(port, () => {
 
 app.patch("/todos/:id", (req, res) => {
 	let id = req.params.id;
+	console.log("ID from PATCH ", id);
+	console.log("RES.STATUS ", res.statusCode);
 	let body = _.pick(req.body, ["text", "completed"]);
 
 	if(!ObjectID.isValid(id)) {
-		res.status(404).send("Not found--Invalid Id.");
-		return;
+		return res.status(404).send("Not found--Invalid Id.");
 	}
 
 	if(_.isBoolean(body.completed) && body.completed) {
@@ -90,6 +91,7 @@ app.patch("/todos/:id", (req, res) => {
 	}
 
 	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+		console.log("UPDATED TODO ", todo);
 		if(!todo) {
 			res.status(400).send();
 		}

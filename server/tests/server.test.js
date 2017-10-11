@@ -5,11 +5,23 @@ const {ObjectID} = require("mongodb");
 const {app} = require("./../server");
 const {Todo} = require("./../models/todos");
 
-const todos = [{
-	"text": "Rescue neighbor from Jocie", "_id": new ObjectID()},{
-	"text": "Teach Caleb Zen of tennis balls", "_id": new ObjectID()},{
-	"text": "Kill the landlord", "_id": new ObjectID()
-	}];
+const todos = [
+	{
+		"text": "Rescue neighbor from Jocie",
+		"_id": new ObjectID()
+	},
+	
+	{
+		"text": "Teach Caleb Zen of tennis balls",
+		"_id": new ObjectID(),
+		"completed": true,
+		"completedAt": 1234
+	},
+	
+	{
+		"text": "Kill the landlord", "_id": new ObjectID()
+	}
+];
 
 beforeEach((done) => {
 	Todo.remove({}).then(() => {
@@ -137,5 +149,51 @@ describe("DELETE /todos/:id", () => {
 			.expect(404)
 			.end((err, res) => {if(err) {console.log(err);} done()});
 	}, err => {res.status(404).send(err)});
+
+});
+
+describe("PATCH /todos/:id", () => {
+	it("should update item by id", (done) =>{
+		let id = todos[1]._id.toHexString();
+		todos[1].text = "Teach dogs to spell";
+		let item = todos[1];
+		testRequest(app)
+			.patch(`/todos/${id}`)
+			.send(item)
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.todo.completed).toBe(todos[1].completed);
+				expect(res.body.todo.text).toBe(item.text);
+				expect(res.body.todo.completedAt).toBeA("number");
+			})
+			.end((err, res) => {
+				if(err) {
+					done(err);
+				}
+				done();
+			});
+	});
+
+	it("should update item by id", (done) =>{
+		let id = todos[1]._id.toHexString();
+		todos[1].text = "Teach dogs to play backgammon";
+		todos[1].completed = false;
+		let item = todos[1];
+		testRequest(app)
+			.patch(`/todos/${id}`)
+			.send(item)
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.todo.completed).toBe(todos[1].completed);
+				expect(res.body.todo.text).toBe(item.text);
+				expect(res.body.todo.completedAt).toNotExist();
+			})
+			.end((err, res) => {
+				if(err) {
+					done(err);
+				}
+				done();
+			});
+	});
 
 });
