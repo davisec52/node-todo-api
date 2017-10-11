@@ -1,4 +1,4 @@
 node_modules
 package.lock.json
-.config
+.config-notes.txt
 server/mongoose.js
