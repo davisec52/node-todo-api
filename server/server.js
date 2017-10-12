@@ -71,8 +71,6 @@ app.delete("/todos/:id", (req, res) => {
 
 app.patch("/todos/:id", (req, res) => {
 	let id = req.params.id;
-	console.log("ID from PATCH ", id);
-	console.log("RES.STATUS ", res.statusCode);
 	let body = _.pick(req.body, ["text", "completed"]);
 
 	if(!ObjectID.isValid(id)) {
@@ -97,6 +95,32 @@ app.patch("/todos/:id", (req, res) => {
 		res.status(400).send();
 	});
 });
+
+// POST todos/users
+
+app.post("/users", (req, res) => {
+	let body = _.pick(req.body, ["email", "password"]);
+	console.log("body ", body);
+	let newUser = new User({
+		email: body.email,
+		password: body.password
+	});
+	newUser.save().then((user) =>{
+		res.send(user);
+	}, err => {res.status(400).send(err);});
+});
+
+// Code copied from course resource file
+/*app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+  user.save().then((user) => {
+    res.send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});*/
 
 app.listen(port, () => {
 	console.log(`Server listening on ${port}...`);
