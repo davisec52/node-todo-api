@@ -7,6 +7,7 @@ const {ObjectID} = require("mongodb");
 const {mongoose} = require("./db/mongoose");
 const {Todo} = require("./models/todos");
 const {User} = require("./models/users");
+const {authenticate} = require("./middleware/authenticate");
 
 const app = express();
 const port = process.env.PORT;
@@ -96,23 +97,11 @@ app.patch("/todos/:id", (req, res) => {
 	});
 });
 
-// POST todos/users--course files
+app.get("/users/me", authenticate, (req,res) => {
+	res.send(req.user);
+});
 
-/*app.post('/users', (req, res) => {
-  var body = _.pick(req.body, ['email', 'password']);
-  var user = new User(body);
-
-  user.save().then(() => {
-    return user.generateAuthToken();
-  }).then((token) => {
-  	console.log("Token from save: ", token);
-    res.header('x-auth', token).send(user);
-  }).catch((e) => {
-    res.status(400).send(e);
-  })
-});*/
-
-// Student code
+// POST todos/users
 
 app.post("/users", (req, res) => {
 	let body = _.pick(req.body, ["email", "password"]);
