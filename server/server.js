@@ -96,31 +96,39 @@ app.patch("/todos/:id", (req, res) => {
 	});
 });
 
-// POST todos/users
+// POST todos/users--course files
 
-app.post("/users", (req, res) => {
-	let body = _.pick(req.body, ["email", "password"]);
-	console.log("body ", body);
-	let newUser = new User({
-		email: body.email,
-		password: body.password
-	});
-	newUser.save().then((user) =>{
-		res.send(user);
-	}, err => {res.status(400).send(err);});
-});
-
-// Code copied from course resource file
 /*app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   var user = new User(body);
 
-  user.save().then((user) => {
-    res.send(user);
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+  	console.log("Token from save: ", token);
+    res.header('x-auth', token).send(user);
   }).catch((e) => {
     res.status(400).send(e);
   })
 });*/
+
+// Student code
+
+app.post("/users", (req, res) => {
+	let body = _.pick(req.body, ["email", "password"]);
+	
+	let newUser = new User({
+		email: body.email,
+		password: body.password
+	});
+
+	newUser.save().then(() => {
+		return newUser.generateAuthToken();
+	}).then((token) => {
+		console.log(token);
+		res.header("x-auth", token).send(newUser);
+	}).catch((e) => res.status(400).send(e));
+});
 
 app.listen(port, () => {
 	console.log(`Server listening on ${port}...`);
