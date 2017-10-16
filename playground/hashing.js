@@ -1,7 +1,21 @@
 const {SHA256} = require("crypto-js");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
 
-let data = {
+console.log("connected to hashing.js");
+
+
+
+let password = "pitbull1";
+
+bcrypt.genSalt(10, (err, salt) => {
+	bcrypt.hash(password, salt, (err, hash) => {
+		console.log(hash);
+	})
+});
+
+/*let data = {
 	id: 42
 };
 
@@ -10,10 +24,7 @@ let token = jwt.sign(data, "...and the terrors are many");
 let decoded = jwt.verify(token, "...and the terrors are many");
 
 console.log("decoded ", decoded);
-
-
-
-
+*/
 /*let message = "je suis 42";
 
 let hash = SHA256(message).toString();
