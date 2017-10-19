@@ -271,5 +271,53 @@ describe("POST /users", () => {
 	});
 });
 
+describe("POST /users/login", () => {
+	it("should login user and return x-auth token", (done) => {
+		let email = users[1].email;
+		let password = users[1].password;
+		testRequest(app)
+			.post("/users/login")
+			.send({email, password})
+			.expect(200)
+			.expect((res) => {
+				expect(res.headers["x-auth"]).toExist();
+			})
+			.end((err, res) => {
+				if(err) {
+					return done(err);
+				}
+					User.findOne({email}).then((user) => {
+						console.log(user);
+						expect(user.password).toNotBe(res.body.password);
+						expect(user.tokens[0]).toInclude({
+							access: "auth",
+							token: res.headers["x-auth"]
+						});
+						done();
+					}).catch((err) => done(err));
+				
+			});
+	});
+
+	it("should reject an invalid login", (done) => {
+		let email = users[1].email;
+		let password = users[0].password;
+		testRequest(app)
+			.post("/users/login")
+			.send({email, password})
+			.expect(400)
+			.end((err, res) => {
+				if(err) {
+					done(err);
+				}
+				User.findOne({email}).then((user) => {
+					expect(user.header(["x-auth"].length)).toBe(0);
+				});
+				done()
+			});
+	});
+
+});
+
 
 
