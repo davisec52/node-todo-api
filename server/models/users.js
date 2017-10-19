@@ -54,6 +54,40 @@ UserSchema.methods.generateAuthToken = function() {
 	});
 };
 
+UserSchema.statics.findByCredentials = function(email, password) {
+	let User = this;
+	//let hash = "$2a$10$FJFxinXf5ldDhVyRNfZY4.HuHOFgUe2IHPzNppVs.UPcNOhsjjAHG";
+	//let plainHash = hash.toString();
+
+	return User.findOne({email}).then((user) => {
+		if(!user) {
+			return Promise.reject();
+		}else {
+			let hash = user.password;
+
+			/*bcrypt.compare(password, hash).then((result) => {
+				console.log(result);
+				if(result) {
+					return user;
+				}else {
+					return Promise.reject();
+				}
+			}).catch((e) => res.status(400).send());*/
+
+			return new Promise((resolve, reject) => {
+				bcrypt.compare(password, hash, (err, result) => {
+					if(result){
+						resolve(user);
+					}else {
+						console.log("error finding match");
+						reject();
+					}
+				});
+			});
+		} //Closing bracket for the higher else statement
+	});
+};
+
 UserSchema.statics.findByToken = function(token) {
 	console.log("Token from UserSchema ", token);
 	let User = this;
@@ -81,7 +115,7 @@ UserSchema.statics.findByToken = function(token) {
 UserSchema.pre("save", function(next) {
 	let user = this;
 
-	if(user.isModified) {
+	if(user.isModified("password")) {
 		bcrypt.genSalt(10, (err, salt) => {
 			bcrypt.hash(user.password, salt, (err, hash) => {
 

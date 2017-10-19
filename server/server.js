@@ -2,6 +2,7 @@ require("../.config/.config")
 const _ = require("lodash");
 const express = require("express");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs");
 
 const {ObjectID} = require("mongodb");
 const {mongoose} = require("./db/mongoose");
@@ -117,6 +118,39 @@ app.post("/users", (req, res) => {
 		console.log(token);
 		res.header("x-auth", token).send(newUser);
 	}).catch((e) => res.status(400).send(e));
+});
+
+app.post("/users/login", (req, res, next) => {
+	//let email = req.body.email;
+	//let password = req.body.password;
+
+	let body = _.pick(req.body, "email", "password");
+
+	User.findByCredentials(body.email, body.password).then((user) => {
+		user.generateAuthToken().then((token) => {
+			res.header("x-auth", token).send(user);
+		});
+	}).catch((e) => res.status(400).send({error: "Bad request or failure to find match"}));
+
+	/*User.findOne({email}).then((user) => {
+		console.log(user);
+		if(!user) {
+			return res.status(400).send({Error: "bad request"});
+		}
+		let hash = user.password;
+
+		bcrypt.compare(password, hash, (err, result) => {
+			console.log("pw result ", result);
+			console.log("text pw ", password);
+			if(err) {
+				console.log(err);
+			}else if(result === false) {
+				res.status(401).send({err: "No match"});
+			}else {
+				res.status(200).send(user);
+			}
+		});
+	}).catch((err) => res.status(400).send({error: "some other error"}));*/
 });
 
 app.listen(port, () => {

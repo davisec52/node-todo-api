@@ -7,12 +7,16 @@ console.log("connected to hashing.js");
 
 
 
-let password = "pitbull1";
+let password = "password123";
 
 bcrypt.genSalt(10, (err, salt) => {
 	bcrypt.hash(password, salt, (err, hash) => {
-		console.log(hash);
+		console.log("hashed pass ", hash);
 	})
+});
+
+bcrypt.compare("password123", "$2a$10$AlKp8Kf/YitbppqBHVNDGO4P3p1o3dnMstd0jzfIsfLOy0uXdJ4ZC", (err, result) => {
+	console.log(result);
 });
 
 /*let data = {
