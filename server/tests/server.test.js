@@ -287,7 +287,6 @@ describe("POST /users/login", () => {
 					return done(err);
 				}
 					User.findOne({email}).then((user) => {
-						console.log(user);
 						expect(user.password).toNotBe(res.body.password);
 						expect(user.tokens[0]).toInclude({
 							access: "auth",
@@ -317,6 +316,29 @@ describe("POST /users/login", () => {
 			});
 	});
 
+});
+
+describe("DELETE /users/me/token", () => {
+	it("should verify token of user has been deleted", (done) => {
+		testRequest(app)
+			.delete("/users/me/token")
+			.set("x-auth", users[0].tokens[0].token)
+			.expect(200)
+			.expect((res) => {
+				expect(res.header["x-auth"]).toNotExist();
+				expect(res.body.tokens).toNotExist();
+			})
+			.end((err, res) => {
+				if(err) {
+					done(err);
+				}else {
+					User.findById({_id: users[0]._id}).then((user) => {
+						expect(user.tokens.length).toBe(0)
+					});
+					done();
+				}
+			});
+	})
 });
 
 

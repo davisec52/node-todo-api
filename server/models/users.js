@@ -62,7 +62,7 @@ UserSchema.methods.removeToken = function(token) {
 			tokens: {token}
 		}
 	});
-}
+};
 
 UserSchema.statics.findByCredentials = function(email, password) {
 	let User = this;
