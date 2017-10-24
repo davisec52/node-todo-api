@@ -5,6 +5,7 @@ const {User} = require("./../../models/users");
 
 let userOneId = new ObjectID();
 let userTwoId = new ObjectID();
+let userThreeId = new ObjectID();
 
 const users = [{
 	_id: userOneId,
@@ -17,25 +18,40 @@ const users = [{
 }, {
 	_id: userTwoId,
 	email: "monkey2@dog.com",
-	password: "userTwoPass"
+	password: "userTwoPass",
+	tokens: [{
+		access: "auth",
+		token: jwt.sign({_id: userTwoId, access: "auth"}, "res ipsa loquitur").toString()
+	}]
+}, {
+	_id: userThreeId,
+	email: "monkey3@dog.com",
+	password: "userThreePass",
+	tokens: [{
+		access: "auth",
+		token: jwt.sign({_id: userThreeId, access: "auth"}, "res ipsa loquitur").toString()
+	}]
 }];
 
 const todos = [
 	{
 		"text": "Rescue neighbor from Jocie",
-		"_id": new ObjectID()
+		"_id": new ObjectID(),
+		_creator: userOneId
 	},
 	
 	{
 		"text": "Teach Caleb Zen of tennis balls",
 		"_id": new ObjectID(),
 		"completed": true,
-		"completedAt": 1234
+		"completedAt": 1234,
+		_creator: userTwoId
 	},
 	
 	{
 		"text": "Kill the landlord",
-		"_id": new ObjectID()
+		"_id": new ObjectID(),
+		_creator: userThreeId
 	}
 ];
 

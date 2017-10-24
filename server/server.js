@@ -15,8 +15,9 @@ const port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-app.post("/todos", (req, res) => {
+app.post("/todos", authenticate, (req, res) => {
 	let newItem = new Todo({
+		_creator: req.user._id,
 		text: req.body.text
 	});
 
@@ -28,42 +29,39 @@ app.post("/todos", (req, res) => {
 	});
 });
 
-app.get("/todos", (req, res) => {
-	Todo.find().then((allTodos) => {
+app.get("/todos", authenticate, (req, res) => {
+	Todo.find({_creator: req.user._id}).then((allTodos) => {
 		if(!allTodos) {
 			return res.status(400).send({allTodos});
 		}
-		console.log(allTodos[0]._id);
 		res.send({allTodos});
 	}, err => {
 		response.status(400).send(err);
 	}).catch((e) => res.status(400).send(e));
 });
 
-app.get("/todos/:id", (req,res) => {
+app.get("/todos/:id", authenticate, (req,res) => {
 	let id = req.params.id;
-	console.log("ID from server.test.js ", id);
 	if(!ObjectID.isValid(id)) {
 		res.status(404).send("Not found--Invalid Id.");
 		return;
 	}
 
-	Todo.findById({_id: id}).then((item) => {
+	Todo.findOne({_id: id, _creator: req.user._id}).then((item) => {
 		if(!item) {
 			return res.status(404).send("Todo item not found in database.");
 		}
-			console.log(item);
 			res.status(200).send({item});
 	}).catch((e) => res.status(400).send(e));
 });
 
-app.delete("/todos/:id", (req, res) => {
+app.delete("/todos/:id", authenticate, (req, res) => {
 	let id = req.params.id;
 	if(!ObjectID.isValid(id)) {
 		return res.status(404).send("Record not found-unable to delete-invalid Id.");
 	}
 
-	Todo.findByIdAndRemove(id).then((todo) => {
+	Todo.findOneAndRemove({_id: id, _creator: req.user._id}).then((todo) => {
 		if(!todo) {
 			return res.status(404).send("No such record");
 		}
@@ -71,7 +69,7 @@ app.delete("/todos/:id", (req, res) => {
 	}).catch((e) => res.status(400).send());
 });
 
-app.patch("/todos/:id", (req, res) => {
+app.patch("/todos/:id", authenticate, (req, res) => {
 	let id = req.params.id;
 	let body = _.pick(req.body, ["text", "completed"]);
 
@@ -80,17 +78,15 @@ app.patch("/todos/:id", (req, res) => {
 	}
 
 	if(_.isBoolean(body.completed) && body.completed) {
-		console.log("body ", body)
 		body.completedAt = new Date().getTime();
 	}else {
 		body.completed = false;
 		body.completedAt = null;
 	}
 
-	Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
-		console.log("UPDATED TODO ", todo);
+	Todo.findOneAndUpdate({_id: id, _creator: req.user._id}, {$set: body}, {new: true}).then((todo) => {
 		if(!todo) {
-			res.status(400).send();
+			res.status(404).send();
 		}
 		res.status(200).send({todo});
 	}).catch((e) => {
@@ -115,7 +111,6 @@ app.post("/users", (req, res) => {
 	newUser.save().then(() => {
 		return newUser.generateAuthToken();
 	}).then((token) => {
-		console.log(token);
 		res.header("x-auth", token).send(newUser);
 	}).catch((e) => res.status(400).send(e));
 });

@@ -2,7 +2,6 @@ let {User} = require("./../models/users");
 
 let authenticate = (req, res, next) => {
 	let token = req.header("x-auth");
-	console.log("Token from authenticate ", token);
 
 	User.findByToken(token).then((user) => {
 		if(!user) {

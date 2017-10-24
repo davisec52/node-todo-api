@@ -89,7 +89,6 @@ UserSchema.statics.findByCredentials = function(email, password) {
 					if(result){
 						resolve(user);
 					}else {
-						console.log("error finding match");
 						reject();
 					}
 				});
@@ -99,13 +98,11 @@ UserSchema.statics.findByCredentials = function(email, password) {
 };
 
 UserSchema.statics.findByToken = function(token) {
-	console.log("Token from UserSchema ", token);
 	let User = this;
 	let decoded;
 
 	try{
 		decoded = jwt.verify(token, "res ipsa loquitur");
-		console.log("Decoded ", decoded);
 	} catch(e) {
 
 		/*return new Promise((resolve, reject) => {
