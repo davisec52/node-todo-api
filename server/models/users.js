@@ -45,7 +45,7 @@ UserSchema.methods.toJSON = function() {
 UserSchema.methods.generateAuthToken = function() {
 	let user = this;
 	let access = "auth";
-	let token = jwt.sign({_id: user._id.toHexString(), access}, "res ipsa loquitur").toString();
+	let token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
 
 	user.tokens.push({access, token});
 
@@ -66,8 +66,6 @@ UserSchema.methods.removeToken = function(token) {
 
 UserSchema.statics.findByCredentials = function(email, password) {
 	let User = this;
-	//let hash = "$2a$10$FJFxinXf5ldDhVyRNfZY4.HuHOFgUe2IHPzNppVs.UPcNOhsjjAHG";
-	//let plainHash = hash.toString();
 
 	return User.findOne({email}).then((user) => {
 		if(!user) {
@@ -102,7 +100,7 @@ UserSchema.statics.findByToken = function(token) {
 	let decoded;
 
 	try{
-		decoded = jwt.verify(token, "res ipsa loquitur");
+		decoded = jwt.verify(token, process.env.JWT_SECRET);
 	} catch(e) {
 
 		/*return new Promise((resolve, reject) => {

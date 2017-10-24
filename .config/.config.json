@@ -1,11 +1,13 @@
 {
 	"test": {
 		"PORT": 3000,
-		"MONGODB_URI": "mongodb://localhost:27017/TodoApp_test"
+		"MONGODB_URI": "mongodb://localhost:27017/TodoApp_test",
+		"JWT_SECRET": "res ipsa loquitur"
 	},
 
 	"development": {
 		"PORT": 3000,
-		"MONGODB_URI": "mongodb://localhost:27017/TodoApp"
+		"MONGODB_URI": "mongodb://localhost:27017/TodoApp",
+		"JWT_SECRET": "Quae res non sit in conspectu tuo, ut videas"
 	}
 }
