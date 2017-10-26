@@ -124,7 +124,7 @@ describe("DELETE /todos/:id", () => {
 				}
 
 				Todo.findById(`${todos[0]._id.toHexString()}`).then((todo)=> {
-					expect(todo).toNotExist();
+					expect(todo).toBeFalsy();
 					done();
 				}).catch((e) => done(e));
 
@@ -142,7 +142,7 @@ describe("DELETE /todos/:id", () => {
 				}
 
 				Todo.findById(`${todos[0]._id.toHexString()}`).then((todo)=> {
-					expect(todo).toExist();
+					expect(todo).toBeTruthy();
 					done();
 				}).catch((e) => done(e));
 
@@ -180,7 +180,8 @@ describe("PATCH /todos/:id", () => {
 			.expect((res) => {
 				expect(res.body.todo.completed).toBe(todos[1].completed);
 				expect(res.body.todo.text).toBe(item.text);
-				expect(res.body.todo.completedAt).toBeA("number");
+				//expect(res.body.todo.completedAt).toBeA("number");
+				expect(typeof res.body.todo.completedAt).toBe("number");
 			})
 			.end((err, res) => {
 				if(err) {
@@ -193,6 +194,7 @@ describe("PATCH /todos/:id", () => {
 	it("should not update item when some other user attempts update", (done) =>{
 		let id = todos[1]._id.toHexString();
 		let text = "Teach dogs to spell";
+		let item = todos[1];
 		testRequest(app)
 			.patch(`/todos/${id}`)
 			.set("x-auth", users[0].tokens[0].token)
@@ -214,7 +216,7 @@ describe("PATCH /todos/:id", () => {
 			.expect((res) => {
 				expect(res.body.todo.completed).toBe(todos[1].completed);
 				expect(res.body.todo.text).toBe(item.text);
-				expect(res.body.todo.completedAt).toNotExist();
+				expect(res.body.todo.completedAt).toBeFalsy();
 			})
 			.end((err, res) => {
 				if(err) {
@@ -267,8 +269,8 @@ describe("POST /users", () => {
 			.send({email, password})
 			.expect(200)
 			.expect((res) => {
-				expect(res.headers["x-auth"]).toExist();
-				expect(res.body._id).toExist();
+				expect(res.headers["x-auth"]).toBeTruthy();
+				expect(res.body._id).toBeTruthy();
 				expect(res.body.email).toBe(email);
 
 			})
@@ -277,14 +279,14 @@ describe("POST /users", () => {
 					return done(err);
 				}
 				User.findOne({email}).then((user) => {
-					expect(user).toExist();
-					expect(user.password).toNotBe(password);
+					expect(user).toBeTruthy();
+					expect(user.password).not.toBe(password);
 					done();
 				});
 			});
 	});
 
-	it("should return validation errors if user data invalid", (done) => {
+	it("should return validation errors if request invalid", (done) => {
 		let email = "user@dog.com";
 		let password = "asburypark";
 
@@ -292,16 +294,7 @@ describe("POST /users", () => {
 			.post("/users")
 			.send({email: "user@dog", password: "asb"})
 			.expect(400)
-			.expect((res) => {
-				expect(res.body.email).toNotBe(email);
-				expect(res.body.password).toNotBe(password);
-			})
-			.end((err) => {
-				if(err) {
-					return done(err);
-				}
-				done();
-			}) 
+			.end(done)
 	});
 
 	it("should not create user if email in use", (done) => {
@@ -325,15 +318,15 @@ describe("POST /users/login", () => {
 			.send({email, password})
 			.expect(200)
 			.expect((res) => {
-				expect(res.headers["x-auth"]).toExist();
+				expect(res.headers["x-auth"]).toBeTruthy();
 			})
 			.end((err, res) => {
 				if(err) {
 					return done(err);
 				}
 					User.findOne({email}).then((user) => {
-						expect(user.password).toNotBe(res.body.password);
-						expect(user.tokens[1]).toInclude({
+						expect(user.password).not.toBe(res.body.password);
+						expect(user.toObject().tokens[1]).toMatchObject({
 							access: "auth",
 							token: res.headers["x-auth"]
 						});
@@ -351,7 +344,7 @@ describe("POST /users/login", () => {
 			.send({email, password})
 			.expect(400)
 			.expect((res) => {
-				expect(res.headers["x-auth"]).toNotExist()
+				expect(res.headers["x-auth"]).toBeFalsy()
 			})
 			.end((err, res) => {
 				if(err) {
@@ -373,8 +366,8 @@ describe("DELETE /users/me/token", () => {
 			.set("x-auth", users[0].tokens[0].token)
 			.expect(200)
 			.expect((res) => {
-				expect(res.header["x-auth"]).toNotExist();
-				expect(res.body.tokens).toNotExist();
+				expect(res.header["x-auth"]).toBeFalsy();
+				expect(res.body.tokens).toBeFalsy();
 			})
 			.end((err, res) => {
 				if(err) {
